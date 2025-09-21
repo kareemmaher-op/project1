@@ -1,0 +1,33 @@
+{
+  "name": "database",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node index.ts",
+    "init-db": "ts-node index.ts",
+    "typeorm": "typeorm-ts-node-commonjs",
+    "migration:generate": "npm run typeorm -- migration:generate migrations/Migration -d config/ormconfig.ts",
+    "migration:run": "npm run typeorm -- migration:run -d config/ormconfig.ts",
+    "migration:revert": "npm run typeorm -- migration:revert -d config/ormconfig.ts",
+    "migration:create": "npm run typeorm -- migration:create migrations/Migration",
+    "migration:show": "npm run typeorm -- migration:show -d config/ormconfig.ts",
+    "schema:drop": "npm run typeorm -- schema:drop -d config/ormconfig.ts"
+  },
+  "keywords": ["typeorm", "database", "postgresql"],
+  "author": "",
+  "license": "ISC",
+  "description": "TypeORM Database Layer with PostgreSQL",
+  "dependencies": {
+    "pg": "^8.16.3",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.26",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.15.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}
