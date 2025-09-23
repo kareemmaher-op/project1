@@ -23,9 +23,6 @@ export class NotificationPreference {
     @Column({ type: 'boolean', default: true })
     enabled!: boolean;
 
-    @Column({ type: 'varchar', length: 255, nullable: true })
-    alert_schedule!: string | null;
-
     @DeleteDateColumn()
     deleted_at?: Date;
 

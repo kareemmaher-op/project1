@@ -1,17 +1,20 @@
 import 'reflect-metadata';
+import { config } from 'dotenv';
 import { DataSource } from 'typeorm';
+
+// Load environment variables
+config();
 import { User, Patient, Case, Medication, NotificationPreference, EmergencyContact, InvitedUser } from '../entities';
 
 let dataSource: DataSource | null = null;
 
 // Optimized database configuration with connection pooling
 function createDataSource(): DataSource {
-    return new DataSource({
+    const dbConfig: any = {
         type: 'postgres',
         host: process.env.DATABASE_HOST || 'localhost',
         port: parseInt(process.env.DATABASE_PORT || '5432'),
         username: process.env.DATABASE_USERNAME || 'postgres',
-        password: process.env.DATABASE_PASSWORD || 'postgres123',
         database: process.env.DATABASE_NAME || 'episure_db',
         synchronize: false, // Always use migrations
         logging: false, // Disable query logging for performance
@@ -24,7 +27,14 @@ function createDataSource(): DataSource {
             connectionTimeoutMillis: 2000,
             acquireTimeoutMillis: 60000
         }
-    });
+    };
+
+    // Only add password if it's provided and not empty
+    if (process.env.DATABASE_PASSWORD && process.env.DATABASE_PASSWORD.trim() !== '') {
+        dbConfig.password = process.env.DATABASE_PASSWORD;
+    }
+
+    return new DataSource(dbConfig);
 }
 
 // Get or create database connection (singleton pattern)

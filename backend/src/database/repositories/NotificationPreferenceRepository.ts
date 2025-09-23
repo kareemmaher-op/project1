@@ -68,8 +68,7 @@ export class NotificationPreferenceRepository {
             // Update existing
             return await this.update(existing.notification_pref_id, {
                 delivery_method: notificationData.delivery_method,
-                enabled: notificationData.enabled,
-                alert_schedule: notificationData.alert_schedule
+                enabled: notificationData.enabled
             }) as NotificationPreference;
         } else {
             // Create new
@@ -78,8 +77,7 @@ export class NotificationPreferenceRepository {
                 case_id: caseId,
                 type: type,
                 delivery_method: notificationData.delivery_method,
-                enabled: notificationData.enabled,
-                alert_schedule: notificationData.alert_schedule
+                enabled: notificationData.enabled
             });
         }
     }

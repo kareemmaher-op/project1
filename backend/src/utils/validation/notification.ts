@@ -55,10 +55,6 @@ export async function validateNotificationPreferencesData(data: NotificationPref
         if (typeof pref.enabled !== 'boolean') {
             errors[`${prefix}.enabled`] = 'Enabled must be a boolean value';
         }
-
-        if (pref.alert_schedule && pref.alert_schedule.trim().length === 0) {
-            errors[`${prefix}.alert_schedule`] = 'Alert schedule cannot be empty if provided';
-        }
     });
 
     return errors;

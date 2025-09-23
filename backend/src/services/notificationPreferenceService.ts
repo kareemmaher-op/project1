@@ -75,8 +75,7 @@ export class NotificationPreferenceService {
 
                     const preferenceData = {
                         delivery_method: methodsValue,
-                        enabled: prefData.enabled,
-                        alert_schedule: prefData.alert_schedule || null
+                        enabled: prefData.enabled
                     };
 
                     let savedPreference;
@@ -176,7 +175,6 @@ export class NotificationPreferenceService {
             type: preference.type,
             delivery_method: preference.delivery_method,
             enabled: preference.enabled,
-            alert_schedule: preference.alert_schedule,
             created_at: preference.created_at,
             updated_at: preference.updated_at
         };

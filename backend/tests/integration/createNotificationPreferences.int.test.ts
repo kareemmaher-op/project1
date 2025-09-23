@@ -215,8 +215,7 @@ describe('Integration: createNotificationPreferences handler', () => {
         notification_preferences: [{
           case_id: caseId,
           delivery_method: 'email',
-          enabled: true,
-          alert_schedule: 'daily_9am'
+          enabled: true
         }]
       };
 
@@ -234,8 +233,7 @@ describe('Integration: createNotificationPreferences handler', () => {
       const request: NotificationPreferencesRequest = {
         notification_preferences: [{
           case_id: caseId,
-          enabled: false,
-          alert_schedule: 'daily_9am'
+          enabled: false
         }]
       };
 
@@ -303,8 +301,7 @@ describe('Integration: createNotificationPreferences handler', () => {
         notification_preferences: [{
           case_id: caseId,
           delivery_method: 'email',
-          enabled: true,
-          alert_schedule: 'daily_9am'
+          enabled: true
         }]
       };
 
@@ -327,8 +324,7 @@ describe('Integration: createNotificationPreferences handler', () => {
         notification_preferences: [{
           case_id: caseId,
           delivery_method: 'email',
-          enabled: true,
-          alert_schedule: 'daily_9am'
+          enabled: true
         }]
       };
 
@@ -341,8 +337,7 @@ describe('Integration: createNotificationPreferences handler', () => {
         notification_preferences: [{
           case_id: caseId,
           delivery_method: 'sms',
-          enabled: true,
-          alert_schedule: 'hourly'
+          enabled: true
         }]
       };
 

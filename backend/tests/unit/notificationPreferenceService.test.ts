@@ -52,8 +52,7 @@ describe('NotificationPreferenceService', () => {
         notification_preferences: [{
           case_id: 'CASE-UT-1',
           delivery_method: 'email',
-          enabled: true,
-          alert_schedule: 'daily_9am'
+          enabled: true
         }]
       };
 
@@ -72,8 +71,7 @@ describe('NotificationPreferenceService', () => {
         notification_preferences: [{
           case_id: 'CASE-UT-1',
           delivery_method: 'email',
-          enabled: true,
-          alert_schedule: 'daily_9am'
+          enabled: true
         }]
       };
 
@@ -84,8 +82,7 @@ describe('NotificationPreferenceService', () => {
         notification_preferences: [{
           case_id: 'CASE-UT-1',
           delivery_method: 'sms',
-          enabled: true,
-          alert_schedule: 'hourly'
+          enabled: true
         }]
       };
 
@@ -100,8 +97,7 @@ describe('NotificationPreferenceService', () => {
       const request: NotificationPreferencesRequest = {
         notification_preferences: [{
           case_id: 'CASE-UT-1',
-          enabled: false,
-          alert_schedule: 'daily_9am'
+          enabled: false
         }]
       };
 

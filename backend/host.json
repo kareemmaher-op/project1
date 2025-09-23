@@ -15,8 +15,9 @@
   "extensions": {
     "http": {
       "cors": {
-        "allowedOrigins": ["*"],
-        "allowedHeaders": ["*"],
+        "allowedOrigins": ["http://localhost:3000", "*"],
+        "allowedMethods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allowedHeaders": ["Content-Type", "Authorization", "x-requested-with"],
         "supportCredentials": false
       }
     }
