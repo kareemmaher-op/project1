@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, DeleteDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, DeleteDateColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Patient } from './Patient';
 import { Case } from './Case';
 import { NotificationPreference } from './NotificationPreference';
@@ -8,6 +8,9 @@ import { NotificationPreference } from './NotificationPreference';
 export class User {
     @PrimaryGeneratedColumn()
     user_id!: number;
+
+    @Column({ type: 'varchar', length: 255, nullable: true })
+    entra_oid?: string;
 
     @Column({ type: 'varchar', length: 100 })
     first_name!: string;
@@ -18,11 +21,14 @@ export class User {
     @Column({ type: 'varchar', length: 255, unique: true })
     email!: string;
 
-    @Column({ type: 'varchar', length: 20 })
-    phone_number!: string;
+    @Column({ type: 'varchar', length: 20, nullable: true })
+    phone_number?: string;
 
-    @Column({ type: 'varchar', length: 255 })
-    password_hash!: string;
+    @Column({ type: 'varchar', length: 255, nullable: true })
+    password_hash?: string;
+
+    @Column({ type: 'varchar', length: 20, default: 'incomplete', nullable: true })
+    account_status?: 'incomplete' | 'complete';
 
     @DeleteDateColumn()
     deleted_at?: Date;

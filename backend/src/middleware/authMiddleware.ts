@@ -1,5 +1,6 @@
 import { HttpRequest, InvocationContext } from '@azure/functions';
 import { ResponseBuilder } from '../types/common';
+import { UserService } from '../services/userService';
 
 export interface AuthenticatedRequest extends HttpRequest {
     authenticatedUser?: {
@@ -12,38 +13,65 @@ export interface AuthenticatedRequest extends HttpRequest {
 
 export class AuthMiddleware {
     /**
-     * Simple authentication middleware that currently always returns true
+     * Authentication middleware that gets user by Entra OID
      * TODO: Implement JWT validation with Azure Entra ID using JWKS
      */
     static async authenticate(request: HttpRequest, context: InvocationContext): Promise<AuthenticatedRequest | null> {
         try {
-            // For now, we'll extract user_id from query parameters or headers
-            // In production, this should validate JWT tokens from Azure Entra ID
-            
-            const userId = request.query.get('user_id') || request.headers.get('x-user-id');
-            
-            if (!userId) {
-                context.log('No user ID provided in request');
+            // Look for user OID in headers (from Entra ID token)
+            const userOid = request.headers.get('x-user-oid');
+
+            // Fallback to legacy user_id for backward compatibility
+            const legacyUserId = request.query.get('user_id') || request.headers.get('x-user-id');
+
+            if (!userOid && !legacyUserId) {
+                context.log('No user OID or legacy user ID provided in request');
                 return null;
             }
 
-            // TODO: Validate JWT token here
-            // 1. Extract token from Authorization header
-            // 2. Verify token signature using Azure Entra ID JWKS
-            // 3. Extract user information from token claims
-            // 4. Return authenticated user object
+            // TODO: Implement full JWT validation with Azure Entra ID JWKS
+            // For now, we'll check if the Authorization header is present for better security
+            const authHeader = request.headers.get('authorization');
+            if (userOid && !authHeader) {
+                context.log('User OID provided but no authorization token');
+                return null;
+            }
 
-            // For now, return a mock user object
             const authenticatedRequest = request as AuthenticatedRequest;
-            authenticatedRequest.authenticatedUser = {
-                user_id: parseInt(userId),
-                email: 'user@example.com', // This should come from JWT claims
-                first_name: 'User',
-                last_name: 'Name'
-            };
 
-            context.log(`User ${userId} authenticated successfully`);
-            return authenticatedRequest;
+            if (userOid) {
+                // Get user by Entra OID from database
+                const userService = new UserService();
+                const user = await userService.getUserByEntraOid(userOid);
+
+                if (!user) {
+                    context.log(`User with OID ${userOid} not found`);
+                    return null;
+                }
+
+                authenticatedRequest.authenticatedUser = {
+                    user_id: user.user_id,
+                    email: user.email,
+                    first_name: user.first_name,
+                    last_name: user.last_name
+                };
+
+                context.log(`User ${userOid} (ID: ${user.user_id}) authenticated successfully`);
+                return authenticatedRequest;
+            } else if (legacyUserId) {
+                // Legacy fallback for development
+                authenticatedRequest.authenticatedUser = {
+                    user_id: parseInt(legacyUserId),
+                    email: 'user@example.com',
+                    first_name: 'User',
+                    last_name: 'Name'
+                };
+
+                context.log(`Legacy user ${legacyUserId} authenticated`);
+                return authenticatedRequest;
+            }
+
+            return null;
 
         } catch (error) {
             context.log('Authentication failed:', error);

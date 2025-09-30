@@ -65,6 +65,11 @@ export class CaseService {
         return this.mapCaseToResponse(caseEntity);
     }
 
+    async getUserCases(userId: number): Promise<CaseResponse[]> {
+        const caseEntities = await this.caseRepository.findByUserId(userId);
+        return caseEntities.map(caseEntity => this.mapCaseToResponse(caseEntity));
+    }
+
     private mapCaseToResponse(caseEntity: any): CaseResponse {
         return {
             case_id: caseEntity.case_id,

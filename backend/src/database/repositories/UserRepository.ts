@@ -18,7 +18,7 @@ export class UserRepository {
         const repository = await this.getRepository();
         return await repository.findOne({
             where: { user_id: id },
-            select: ['user_id', 'first_name', 'last_name', 'email']
+            select: ['user_id', 'first_name', 'last_name', 'email', 'entra_oid', 'account_status', 'first_login_completed']
         });
     }
 
@@ -26,7 +26,15 @@ export class UserRepository {
         const repository = await this.getRepository();
         return await repository.findOne({
             where: { email },
-            select: ['user_id', 'first_name', 'last_name', 'email', 'password_hash']
+            select: ['user_id', 'first_name', 'last_name', 'email', 'password_hash', 'entra_oid', 'account_status']
+        });
+    }
+
+    async findByEntraOid(entraOid: string): Promise<User | null> {
+        const repository = await this.getRepository();
+        return await repository.findOne({
+            where: { entra_oid: entraOid },
+            select: ['user_id', 'first_name', 'last_name', 'email', 'entra_oid', 'account_status', 'first_login_completed']
         });
     }
 

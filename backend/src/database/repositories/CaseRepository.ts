@@ -47,4 +47,13 @@ export class CaseRepository {
         await repository.update(caseId, { patient_id: patientId });
         return await repository.findOne({ where: { id: caseId } });
     }
+
+    async findByUserId(userId: number): Promise<Case[]> {
+        const repository = await this.getRepository();
+        return await repository.find({
+            where: { user_id: userId },
+            relations: ['patient', 'medications'],
+            order: { id: 'DESC' }
+        });
+    }
 }

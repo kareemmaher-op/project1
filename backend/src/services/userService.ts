@@ -1,4 +1,14 @@
 import { UserRepository } from '../database/repositories';
+import { User } from '../database/entities';
+
+interface CreateUserData {
+    entra_oid: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    account_status?: 'incomplete' | 'complete';
+    first_login_completed?: boolean;
+}
 
 export class UserService {
     private userRepository: UserRepository;
@@ -13,6 +23,51 @@ export class UserService {
 
     async getUserByEmail(email: string) {
         return await this.userRepository.findByEmail(email);
+    }
+
+    async getUserByEntraOid(entraOid: string): Promise<User | null> {
+        return await this.userRepository.findByEntraOid(entraOid);
+    }
+
+    async createUser(userData: CreateUserData): Promise<User> {
+        // Check if user already exists with this Entra OID
+        const existingUser = await this.getUserByEntraOid(userData.entra_oid);
+        if (existingUser) {
+            throw new Error('User already exists with this Entra ID');
+        }
+
+        // Check if user already exists with this email
+        const existingEmailUser = await this.getUserByEmail(userData.email);
+        if (existingEmailUser) {
+            throw new Error('User already exists with this email');
+        }
+
+        return await this.userRepository.create({
+            ...userData,
+            account_status: userData.account_status || 'incomplete'
+        });
+    }
+
+    async updateUserStatus(entraOid: string, status: 'incomplete' | 'complete'): Promise<User> {
+        const user = await this.getUserByEntraOid(entraOid);
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        return await this.userRepository.update(user.user_id, {
+            account_status: status
+        });
+    }
+
+    async markFirstLoginCompleted(entraOid: string): Promise<User> {
+        const user = await this.getUserByEntraOid(entraOid);
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        return await this.userRepository.update(user.user_id, {
+            first_login_completed: true
+        });
     }
 
     async getProfile(userId: number): Promise<{ userId: number; firstName: string; lastName: string; email: string; }> {
