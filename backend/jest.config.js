@@ -10,18 +10,13 @@ module.exports = {
   moduleNameMapper: {
     '^src/(.*)$': '<rootDir>/src/$1'
   },
-  clearMocks: true,
-  setupFiles: [],
-};
-module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
   testMatch: ['**/tests/**/*.test.ts', '**/tests/**/*.int.test.ts'],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   modulePathIgnorePatterns: ['<rootDir>/dist/'],
   testTimeout: 30000,
   detectOpenHandles: true,
   forceExit: true,
+  clearMocks: true,
   collectCoverage: true,
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',

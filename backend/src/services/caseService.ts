@@ -1,20 +1,18 @@
-import { CaseRepository, PatientRepository, UserRepository } from '../database/repositories';
+import { CaseRepository, UserRepository } from '../database/repositories';
 import { CaseRegistrationRequest, CaseResponse } from '../types/case';
 import { getTransactionManager } from '../database/config/database';
 
 export class CaseService {
     private caseRepository: CaseRepository;
-    private patientRepository: PatientRepository;
 
     constructor() {
         this.caseRepository = new CaseRepository();
-        this.patientRepository = new PatientRepository();
     }
 
     async createCase(caseData: CaseRegistrationRequest, userId: number): Promise<CaseResponse> {
         const transactionManager = await getTransactionManager();
-        
-        return await transactionManager.transaction(async (manager) => {
+
+        return await transactionManager.transaction(async (_manager) => {
             // Validate user exists (avoid FK violation)
             const userRepo = new UserRepository();
             const user = await userRepo.findById(userId);

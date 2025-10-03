@@ -6,28 +6,28 @@ import { EmergencyContact } from '../database/entities/EmergencyContact';
 
 export interface CreateEmergencyContactsOptions {
     caseCode: string;
-	contacts: Array<{
-		first_name: string;
-		last_name: string;
-		email: string;
-		phone_number: string;
-		send_invite?: boolean;
-	}>;
-	createdByUserId: number;
+    contacts: Array<{
+        first_name: string;
+        last_name: string;
+        email: string;
+        phone_number: string;
+        send_invite?: boolean;
+    }>;
+    createdByUserId: number;
 }
 
 export class EmergencyContactService {
-	private emergencyContactRepository: EmergencyContactRepository;
-	private invitedUserRepository: InvitedUserRepository;
+    private emergencyContactRepository: EmergencyContactRepository;
+    private invitedUserRepository: InvitedUserRepository;
     private caseRepository: CaseRepository;
     private userRepository: UserRepository;
 
-	constructor() {
-		this.emergencyContactRepository = new EmergencyContactRepository();
-		this.invitedUserRepository = new InvitedUserRepository();
+    constructor() {
+        this.emergencyContactRepository = new EmergencyContactRepository();
+        this.invitedUserRepository = new InvitedUserRepository();
         this.caseRepository = new CaseRepository();
         this.userRepository = new UserRepository();
-	}
+    }
 
     async createEmergencyContacts(options: CreateEmergencyContactsOptions): Promise<{ saved: EmergencyContact[]; skipped: Array<{ email: string; reason: string }>; workflow_state: string; message: string; }>{
         const { caseCode, contacts, createdByUserId } = options;

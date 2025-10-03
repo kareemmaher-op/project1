@@ -54,9 +54,15 @@ export class UserService {
             throw new Error('User not found');
         }
 
-        return await this.userRepository.update(user.user_id, {
+        const updated = await this.userRepository.update(user.user_id, {
             account_status: status
         });
+
+        if (!updated) {
+            throw new Error('Failed to update user status');
+        }
+
+        return updated;
     }
 
     async markFirstLoginCompleted(entraOid: string): Promise<User> {
@@ -65,9 +71,15 @@ export class UserService {
             throw new Error('User not found');
         }
 
-        return await this.userRepository.update(user.user_id, {
+        const updated = await this.userRepository.update(user.user_id, {
             first_login_completed: true
         });
+
+        if (!updated) {
+            throw new Error('Failed to mark first login as completed');
+        }
+
+        return updated;
     }
 
     async getProfile(userId: number): Promise<{ userId: number; firstName: string; lastName: string; email: string; }> {

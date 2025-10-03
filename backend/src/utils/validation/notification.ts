@@ -21,39 +21,40 @@ export async function validateNotificationPreferencesData(data: NotificationPref
 
     // Validate each notification preference
     data.notification_preferences.forEach((pref, index) => {
-        const prefix = `notification_preferences[${index}]`;
+        const prefix: string = `notification_preferences[${index}]`;
 
         if (!pref.case_id || pref.case_id.trim().length === 0) {
-            errors[`${prefix}.case_id`] = 'Case ID is required';
+            errors[prefix + '.case_id'] = 'Case ID is required';
         }
 
         // Delivery methods validation (supports both legacy single string and new array)
-        const allowed = ['email', 'sms', 'push', 'in_app'];
+        const allowed: string[] = ['email', 'sms', 'push', 'in_app'];
         if (pref.enabled) {
-            const hasArray = Array.isArray((pref as any).delivery_methods);
-            const hasSingle = typeof pref.delivery_method === 'string' && pref.delivery_method.trim().length > 0;
+            const prefWithMethods = pref as any;
+            const hasArray: boolean = Array.isArray(prefWithMethods.delivery_methods);
+            const hasSingle: boolean = typeof pref.delivery_method === 'string' && pref.delivery_method.trim().length > 0;
 
             if (!hasArray && !hasSingle) {
-                errors[`${prefix}.delivery_methods`] = 'At least one delivery method is required when notification is enabled';
+                errors[prefix + '.delivery_methods'] = 'At least one delivery method is required when notification is enabled';
             }
 
             if (hasArray) {
-                const methods = (pref as any).delivery_methods as string[];
+                const methods: string[] = prefWithMethods.delivery_methods as string[];
                 if (methods.length === 0) {
-                    errors[`${prefix}.delivery_methods`] = 'At least one delivery method is required when notification is enabled';
-                } else if (methods.some(m => typeof m !== 'string' || !allowed.includes(m))) {
-                    errors[`${prefix}.delivery_methods`] = 'Each delivery method must be one of: email, sms, push, in_app';
+                    errors[prefix + '.delivery_methods'] = 'At least one delivery method is required when notification is enabled';
+                } else if (methods.some((m: string) => typeof m !== 'string' || !allowed.includes(m))) {
+                    errors[prefix + '.delivery_methods'] = 'Each delivery method must be one of: email, sms, push, in_app';
                 }
             } else if (hasSingle) {
                 if (!allowed.includes(pref.delivery_method as string)) {
-                    errors[`${prefix}.delivery_method`] = 'Delivery method must be one of: email, sms, push, in_app';
+                    errors[prefix + '.delivery_method'] = 'Delivery method must be one of: email, sms, push, in_app';
                 }
             }
         }
         // If disabled, delivery_method(s) can be null/empty (optional)
 
         if (typeof pref.enabled !== 'boolean') {
-            errors[`${prefix}.enabled`] = 'Enabled must be a boolean value';
+            errors[prefix + '.enabled'] = 'Enabled must be a boolean value';
         }
     });
 

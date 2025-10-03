@@ -2,38 +2,38 @@ import { InvitedUserRepository } from '../database/repositories/InvitedUserRepos
 import { CaseRepository, UserRepository } from '../database/repositories';
 
 export class InvitedUserService {
-	private invitedUserRepository: InvitedUserRepository;
+    private invitedUserRepository: InvitedUserRepository;
     private caseRepository: CaseRepository;
     private userRepository: UserRepository;
 
-	constructor() {
-		this.invitedUserRepository = new InvitedUserRepository();
+    constructor() {
+        this.invitedUserRepository = new InvitedUserRepository();
         this.caseRepository = new CaseRepository();
         this.userRepository = new UserRepository();
-	}
+    }
 
-	async inviteUserToCase(caseId: number, email: string, authenticatedUserId: number) {
-		const exists = await this.invitedUserRepository.existsEmailForCase(caseId, email);
-		if (exists) {
-			throw new Error('Conflict: Invitation already exists for this case');
-		}
-		return this.invitedUserRepository.createAndSave({ case_id: caseId, user_id: null, email });
-	}
+    async inviteUserToCase(caseId: number, email: string, _authenticatedUserId: number) {
+        const exists = await this.invitedUserRepository.existsEmailForCase(caseId, email);
+        if (exists) {
+            throw new Error('Conflict: Invitation already exists for this case');
+        }
+        return this.invitedUserRepository.createAndSave({ case_id: caseId, user_id: null, email });
+    }
 
-	async inviteUsersToCase(caseId: number, emails: string[], authenticatedUserId: number) {
-		const created: Array<{ email: string }> = [];
-		const skipped: Array<{ email: string; reason: string }> = [];
-		for (const email of emails) {
-			const exists = await this.invitedUserRepository.existsEmailForCase(caseId, email);
-			if (exists) {
-				skipped.push({ email, reason: 'Invitation already exists for this case' });
-				continue;
-			}
-			await this.invitedUserRepository.createAndSave({ case_id: caseId, user_id: null, email });
-			created.push({ email });
-		}
-		return { created, skipped };
-	}
+    async inviteUsersToCase(caseId: number, emails: string[], _authenticatedUserId: number) {
+        const created: Array<{ email: string }> = [];
+        const skipped: Array<{ email: string; reason: string }> = [];
+        for (const email of emails) {
+            const exists = await this.invitedUserRepository.existsEmailForCase(caseId, email);
+            if (exists) {
+                skipped.push({ email, reason: 'Invitation already exists for this case' });
+                continue;
+            }
+            await this.invitedUserRepository.createAndSave({ case_id: caseId, user_id: null, email });
+            created.push({ email });
+        }
+        return { created, skipped };
+    }
 
     private async resolveAuthorizedCaseId(caseCode: string, authenticatedUserId: number): Promise<number> {
         const user = await this.userRepository.findById(authenticatedUserId);

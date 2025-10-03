@@ -110,15 +110,15 @@ export class NotificationPreferenceService {
             const allPreferences = [...createdPreferences, ...updatedPreferences];
 
             // Verify all cases have all 7 notification types set up before updating case step
-            for (const [caseId, caseInfo] of processedCases) {
+            for (const caseInfo of processedCases.values()) {
                 if (caseInfo.actualCount !== caseInfo.expectedCount) {
                     throw new Error(`Failed to set up all notification preferences for case ${caseInfo.caseCode}. Expected ${caseInfo.expectedCount}, got ${caseInfo.actualCount}`);
                 }
             }
 
             // Only update case step if ALL notification preferences are successfully set up for ALL cases
-            for (const [caseId, caseInfo] of processedCases) {
-                await manager.update('cases', { id: caseId }, { 
+            for (const [caseId] of processedCases) {
+                await manager.update('cases', { id: caseId }, {
                     current_step: 'NOTIFICATIONS_CONFIGURED'
                 });
             }
@@ -148,7 +148,7 @@ export class NotificationPreferenceService {
 
         return {
             message: `Found ${preferences.length} notification preferences for case ${caseId}`,
-            workflow_state: targetCase.current_step 
+            workflow_state: targetCase.current_step || 'CREATED'
         };
     }
 
@@ -167,16 +167,4 @@ export class NotificationPreferenceService {
         };
     }
 
-    private mapNotificationPreferenceToResponse(preference: any): any {
-        return {
-            notification_pref_id: preference.notification_pref_id,
-            case_id: preference.case_id,
-            user_id: preference.user_id,
-            type: preference.type,
-            delivery_method: preference.delivery_method,
-            enabled: preference.enabled,
-            created_at: preference.created_at,
-            updated_at: preference.updated_at
-        };
-    }
 }

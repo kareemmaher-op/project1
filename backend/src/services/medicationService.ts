@@ -36,7 +36,7 @@ export class MedicationService {
 
             // Check step: allow if PATIENT_LINKED or already DEVICE_LINKED/MEDICAL_LINKED
             const allowedSteps = ['PATIENT_LINKED', 'MEDICAL_LINKED', 'DEVICE_LINKED'];
-            if (!allowedSteps.includes(caseEntity.current_step)) {
+            if (!caseEntity.current_step || !allowedSteps.includes(caseEntity.current_step)) {
                 throw new Error('Invalid request: invalid workflow step');
             }
 
@@ -55,7 +55,9 @@ export class MedicationService {
                     // keep existing status if provided, otherwise default pending
                     status: existingMedication.status || 'pending',
                     expiration_date_spray_1: new Date(medicationData.expiration_date_spray_1),
+                    lot_number_spray_1: medicationData.lot_number_spray_1 ?? existingMedication.lot_number_spray_1 ?? null,
                     expiration_date_spray_2: new Date(medicationData.expiration_date_spray_2),
+                    lot_number_spray_2: medicationData.lot_number_spray_2 ?? existingMedication.lot_number_spray_2 ?? null,
                     dosage_details: medicationData.dosage_details ?? existingMedication.dosage_details ?? null
                 });
                 if (!medication) {
@@ -68,7 +70,9 @@ export class MedicationService {
                     spray_number: medicationData.spray_number,
                     status: 'pending',
                     expiration_date_spray_1: new Date(medicationData.expiration_date_spray_1),
+                    lot_number_spray_1: medicationData.lot_number_spray_1 || null,
                     expiration_date_spray_2: new Date(medicationData.expiration_date_spray_2),
+                    lot_number_spray_2: medicationData.lot_number_spray_2 || null,
                     dosage_details: medicationData.dosage_details || null
                 });
             }
@@ -91,7 +95,9 @@ export class MedicationService {
             spray_number: medication.spray_number,
             status: medication.status,
             expiration_date_spray_1: medication.expiration_date_spray_1,
+            lot_number_spray_1: medication.lot_number_spray_1,
             expiration_date_spray_2: medication.expiration_date_spray_2,
+            lot_number_spray_2: medication.lot_number_spray_2,
             dosage_details: medication.dosage_details,
             created_at: medication.created_at,
             updated_at: medication.updated_at

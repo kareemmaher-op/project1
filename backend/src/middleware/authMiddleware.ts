@@ -1,6 +1,7 @@
 import { HttpRequest, InvocationContext } from '@azure/functions';
 import { ResponseBuilder } from '../types/common';
 import { UserService } from '../services/userService';
+import { JwtValidator } from '../utils/jwtValidator';
 
 export interface AuthenticatedRequest extends HttpRequest {
     authenticatedUser?: {
@@ -8,73 +9,78 @@ export interface AuthenticatedRequest extends HttpRequest {
         email: string;
         first_name: string;
         last_name: string;
+        entra_oid: string;
     };
 }
 
 export class AuthMiddleware {
     /**
-     * Authentication middleware that gets user by Entra OID
-     * TODO: Implement JWT validation with Azure Entra ID using JWKS
+     * Authentication middleware with JWT validation using Azure Entra ID JWKS
+     * Supports both JWT token authentication and legacy mode for development
      */
     static async authenticate(request: HttpRequest, context: InvocationContext): Promise<AuthenticatedRequest | null> {
         try {
-            // Look for user OID in headers (from Entra ID token)
-            const userOid = request.headers.get('x-user-oid');
-
-            // Fallback to legacy user_id for backward compatibility
+            const authHeader = request.headers.get('authorization');
             const legacyUserId = request.query.get('user_id') || request.headers.get('x-user-id');
 
-            if (!userOid && !legacyUserId) {
-                context.log('No user OID or legacy user ID provided in request');
-                return null;
-            }
+            // Try JWT authentication first
+            if (authHeader) {
+                try {
+                    // Validate JWT token with JWKS
+                    const decodedToken = await JwtValidator.validateAuthHeader(authHeader);
 
-            // TODO: Implement full JWT validation with Azure Entra ID JWKS
-            // For now, we'll check if the Authorization header is present for better security
-            const authHeader = request.headers.get('authorization');
-            if (userOid && !authHeader) {
-                context.log('User OID provided but no authorization token');
-                return null;
-            }
+                    context.log(`JWT validated for user OID: ${decodedToken.oid}`);
 
-            const authenticatedRequest = request as AuthenticatedRequest;
+                    // Get user from database by Entra OID
+                    const userService = new UserService();
+                    const user = await userService.getUserByEntraOid(decodedToken.oid);
 
-            if (userOid) {
-                // Get user by Entra OID from database
-                const userService = new UserService();
-                const user = await userService.getUserByEntraOid(userOid);
+                    if (!user) {
+                        context.log(`User with OID ${decodedToken.oid} not found in database`);
+                        return null;
+                    }
 
-                if (!user) {
-                    context.log(`User with OID ${userOid} not found`);
+                    const authenticatedRequest = request as AuthenticatedRequest;
+                    authenticatedRequest.authenticatedUser = {
+                        user_id: user.user_id,
+                        email: user.email,
+                        first_name: user.first_name,
+                        last_name: user.last_name,
+                        entra_oid: decodedToken.oid
+                    };
+
+                    context.log(`User ${decodedToken.oid} (ID: ${user.user_id}) authenticated successfully via JWT`);
+                    return authenticatedRequest;
+
+                } catch (jwtError) {
+                    context.error(`JWT validation failed: ${jwtError instanceof Error ? jwtError.message : 'Unknown error'}`);
                     return null;
                 }
+            }
 
-                authenticatedRequest.authenticatedUser = {
-                    user_id: user.user_id,
-                    email: user.email,
-                    first_name: user.first_name,
-                    last_name: user.last_name
-                };
+            // Fallback to legacy authentication for development (only if enabled)
+            const allowLegacyAuth = process.env.ALLOW_LEGACY_AUTH === 'true';
 
-                context.log(`User ${userOid} (ID: ${user.user_id}) authenticated successfully`);
-                return authenticatedRequest;
-            } else if (legacyUserId) {
-                // Legacy fallback for development
+            if (allowLegacyAuth && legacyUserId) {
+                context.warn(`LEGACY AUTH USED - This should only be enabled in development! User ID: ${legacyUserId}`);
+
+                const authenticatedRequest = request as AuthenticatedRequest;
                 authenticatedRequest.authenticatedUser = {
                     user_id: parseInt(legacyUserId),
-                    email: 'user@example.com',
-                    first_name: 'User',
-                    last_name: 'Name'
+                    email: 'legacy@example.com',
+                    first_name: 'Legacy',
+                    last_name: 'User',
+                    entra_oid: 'legacy-' + legacyUserId
                 };
 
-                context.log(`Legacy user ${legacyUserId} authenticated`);
                 return authenticatedRequest;
             }
 
+            context.log('No valid authentication credentials provided');
             return null;
 
         } catch (error) {
-            context.log('Authentication failed:', error);
+            context.error('Authentication failed:', error);
             return null;
         }
     }

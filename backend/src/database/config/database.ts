@@ -16,7 +16,7 @@ function createDataSource(): DataSource {
         port: parseInt(process.env.DATABASE_PORT || '5432'),
         username: process.env.DATABASE_USERNAME || 'postgres',
         database: process.env.DATABASE_NAME || 'episure_db',
-        synchronize: true, // Force sync to pick up entity changes
+        synchronize: false, // Disabled to prevent schema conflicts
         logging: false, // Disable query logging for performance
         entities: [User, Patient, Case, Medication, NotificationPreference, EmergencyContact, InvitedUser],
         // Connection pooling optimization

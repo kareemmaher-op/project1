@@ -28,6 +28,7 @@ export interface NotificationPreferencesResponse {
 }
 
 export interface NotificationValidationErrors {
+    [key: string]: string | undefined;
     case_id?: string;
     delivery_method?: string;
     delivery_methods?: string;

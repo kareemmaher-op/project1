@@ -7,7 +7,7 @@ import { UserService } from "../services/userService";
 
 // GET /me/profile
 export const getProfileHandler = HttpHandler.wrap(
-    AuthMiddleware.withAuth(async (request, context) => {
+    AuthMiddleware.withAuth(async (request, _context) => {
         await initializeDatabase();
         const authReq = request as AuthenticatedRequest;
         const authenticatedUserId = authReq.authenticatedUser?.user_id;

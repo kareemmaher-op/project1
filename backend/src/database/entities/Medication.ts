@@ -24,8 +24,14 @@ export class Medication {
     @Column({ type: 'date' })
     expiration_date_spray_1!: Date;
 
+    @Column({ type: 'varchar', length: 50, nullable: true })
+    lot_number_spray_1!: string | null;
+
     @Column({ type: 'date' })
     expiration_date_spray_2!: Date;
+
+    @Column({ type: 'varchar', length: 50, nullable: true })
+    lot_number_spray_2!: string | null;
 
     @Column({ type: 'varchar', length: 500, nullable: true })
     dosage_details!: string | null;

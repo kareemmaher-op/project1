@@ -25,6 +25,15 @@ export async function validateMedicationData(data: MedicationRegistrationRequest
         errors.expiration_date_spray_2 = 'Invalid date format';
     }
 
+    // LOT number validation (optional fields)
+    if (data.lot_number_spray_1 && data.lot_number_spray_1.length > 50) {
+        errors.lot_number_spray_1 = 'LOT number for spray 1 cannot exceed 50 characters';
+    }
+
+    if (data.lot_number_spray_2 && data.lot_number_spray_2.length > 50) {
+        errors.lot_number_spray_2 = 'LOT number for spray 2 cannot exceed 50 characters';
+    }
+
     return errors;
 }
 

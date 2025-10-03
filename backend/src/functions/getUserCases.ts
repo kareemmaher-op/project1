@@ -16,24 +16,21 @@ export const getUserCasesHandler = HttpHandler.wrap(
             return ResponseBuilder.unauthorized('Unauthorized');
         }
 
-        console.log(`GET http://localhost:7071/api/cases/user - Function started`);
-        const userOid = request.headers.get('x-user-oid');
-        console.log(`User ${userOid} (ID: ${authenticatedUserId}) authenticated successfully`);
+        context.log(`User ${authenticatedUserId} retrieving cases`);
 
         try {
             // Get user cases
             const caseService = new CaseService();
             const userCases = await caseService.getUserCases(authenticatedUserId);
 
-            console.log(`Found ${userCases.length} cases for user ${authenticatedUserId}`);
-            console.log(`GET http://localhost:7071/api/cases/user - Function completed successfully`);
+            context.log(`Found ${userCases.length} cases for user ${authenticatedUserId}`);
 
             return ResponseBuilder.success({
                 data: userCases,
                 message: 'User cases retrieved successfully'
             });
         } catch (error) {
-            console.error('Error getting user cases:', error);
+            context.error('Error getting user cases:', error);
             return ResponseBuilder.internalServerError('Failed to get user cases');
         }
     })

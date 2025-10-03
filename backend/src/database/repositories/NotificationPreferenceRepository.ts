@@ -1,6 +1,7 @@
 import { Repository } from 'typeorm';
 import { NotificationPreference } from '../entities/NotificationPreference';
 import { getDatabase } from '../config/database';
+import { ErrorHandler } from '../../utils/errorHandler';
 
 export class NotificationPreferenceRepository {
     private async getRepository(): Promise<Repository<NotificationPreference>> {
@@ -9,48 +10,61 @@ export class NotificationPreferenceRepository {
     }
 
     async create(notificationData: Partial<NotificationPreference>): Promise<NotificationPreference> {
-        const repository = await this.getRepository();
-        const notification = repository.create(notificationData);
-        return await repository.save(notification);
+        return await ErrorHandler.wrapDatabaseOperation(async () => {
+            const repository = await this.getRepository();
+            const notification = repository.create(notificationData);
+            return await repository.save(notification);
+        }, 'create');
     }
 
     async findByUserAndCaseAndType(
-        userId: number, 
-        caseId: number, 
+        userId: number,
+        caseId: number,
         type: string
     ): Promise<NotificationPreference | null> {
-        const repository = await this.getRepository();
-        return await repository.findOne({
-            where: {
-                user_id: userId,
-                case_id: caseId,
-                type: type
-            }
-        });
+        return await ErrorHandler.wrapDatabaseOperation(async () => {
+            const repository = await this.getRepository();
+            return await repository.findOne({
+                where: {
+                    user_id: userId,
+                    case_id: caseId,
+                    type: type
+                }
+            });
+        }, 'findByUserAndCaseAndType');
     }
 
     async findByUserAndCase(userId: number, caseId: number): Promise<NotificationPreference[]> {
-        const repository = await this.getRepository();
-        return await repository.find({
-            where: {
-                user_id: userId,
-                case_id: caseId
-            }
-        });
+        return await ErrorHandler.wrapDatabaseOperation(async () => {
+            const repository = await this.getRepository();
+            return await repository.find({
+                where: {
+                    user_id: userId,
+                    case_id: caseId
+                }
+            });
+        }, 'findByUserAndCase');
     }
 
     async findByUserId(userId: number): Promise<NotificationPreference[]> {
-        const repository = await this.getRepository();
-        return await repository.find({
-            where: { user_id: userId },
-            relations: ['case']
-        });
+        return await ErrorHandler.wrapDatabaseOperation(async () => {
+            const repository = await this.getRepository();
+            return await repository.find({
+                where: { user_id: userId },
+                relations: ['case']
+            });
+        }, 'findByUserId');
     }
 
     async update(id: number, notificationData: Partial<NotificationPreference>): Promise<NotificationPreference | null> {
-        const repository = await this.getRepository();
-        await repository.update(id, notificationData);
-        return await repository.findOne({ where: { notification_pref_id: id } });
+        return await ErrorHandler.wrapDatabaseOperation(async () => {
+            const repository = await this.getRepository();
+            const existing = await repository.findOne({ where: { notification_pref_id: id } });
+            ErrorHandler.ensureFound(existing, 'NotificationPreference');
+
+            await repository.update(id, notificationData);
+            return await repository.findOne({ where: { notification_pref_id: id } });
+        }, 'update');
     }
 
     async upsert(
@@ -59,42 +73,58 @@ export class NotificationPreferenceRepository {
         type: string,
         notificationData: Partial<NotificationPreference>
     ): Promise<NotificationPreference> {
-        const repository = await this.getRepository();
-        
-        // Try to find existing notification preference
-        const existing = await this.findByUserAndCaseAndType(userId, caseId, type);
-        
-        if (existing) {
-            // Update existing
-            return await this.update(existing.notification_pref_id, {
-                delivery_method: notificationData.delivery_method,
-                enabled: notificationData.enabled
-            }) as NotificationPreference;
-        } else {
-            // Create new
-            return await this.create({
-                user_id: userId,
-                case_id: caseId,
-                type: type,
-                delivery_method: notificationData.delivery_method,
-                enabled: notificationData.enabled
-            });
-        }
+        return await ErrorHandler.wrapDatabaseOperation(async () => {
+            // Try to find existing notification preference
+            const existing = await this.findByUserAndCaseAndType(userId, caseId, type);
+
+            if (existing) {
+                // Update existing
+                return await this.update(existing.notification_pref_id, {
+                    delivery_method: notificationData.delivery_method,
+                    enabled: notificationData.enabled
+                }) as NotificationPreference;
+            } else {
+                // Create new
+                return await this.create({
+                    user_id: userId,
+                    case_id: caseId,
+                    type: type,
+                    delivery_method: notificationData.delivery_method,
+                    enabled: notificationData.enabled
+                });
+            }
+        }, 'upsert');
     }
 
     async delete(id: number): Promise<boolean> {
-        const repository = await this.getRepository();
-        const result = await repository.softDelete(id);
-        return result.affected !== undefined && result.affected > 0;
+        return await ErrorHandler.wrapDatabaseOperation(async () => {
+            const repository = await this.getRepository();
+            const existing = await repository.findOne({ where: { notification_pref_id: id } });
+            ErrorHandler.ensureFound(existing, 'NotificationPreference');
+
+            const result = await repository.softDelete(id);
+            return result.affected !== undefined && result.affected > 0;
+        }, 'delete');
     }
 
     async deleteByUserAndCaseAndType(userId: number, caseId: number, type: string): Promise<boolean> {
-        const repository = await this.getRepository();
-        const result = await repository.softDelete({
-            user_id: userId,
-            case_id: caseId,
-            type: type
-        });
-        return result.affected !== undefined && result.affected > 0;
+        return await ErrorHandler.wrapDatabaseOperation(async () => {
+            const repository = await this.getRepository();
+            const existing = await repository.findOne({
+                where: {
+                    user_id: userId,
+                    case_id: caseId,
+                    type: type
+                }
+            });
+            ErrorHandler.ensureFound(existing, 'NotificationPreference');
+
+            const result = await repository.softDelete({
+                user_id: userId,
+                case_id: caseId,
+                type: type
+            });
+            return result.affected !== undefined && result.affected > 0;
+        }, 'deleteByUserAndCaseAndType');
     }
 }
