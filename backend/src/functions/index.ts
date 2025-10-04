@@ -9,3 +9,4 @@ import './inviteMember';
 import './auth/users';
 import './markFirstLoginCompleted';
 import './getUserCases';
+import './health';
