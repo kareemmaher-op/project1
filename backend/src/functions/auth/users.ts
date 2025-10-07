@@ -50,12 +50,15 @@ export async function createUser(request: HttpRequest, context: InvocationContex
         return {
             status: 201,
             jsonBody: {
-                entra_oid: user.entra_oid,
-                email: user.email,
-                first_name: user.first_name,
-                last_name: user.last_name,
-                account_status: user.account_status,
-                first_login_completed: user.first_login_completed
+                user: {
+                    user_id: user.user_id,
+                    entra_oid: user.entra_oid,
+                    email: user.email,
+                    first_name: user.first_name,
+                    last_name: user.last_name,
+                    account_status: user.account_status,
+                    first_login_completed: user.first_login_completed
+                }
             }
         };
     } catch (error: any) {
@@ -108,12 +111,15 @@ export async function getUserByOid(request: HttpRequest, context: InvocationCont
         return {
             status: 200,
             jsonBody: {
-                entra_oid: user.entra_oid,
-                email: user.email,
-                first_name: user.first_name,
-                last_name: user.last_name,
-                account_status: user.account_status,
-                first_login_completed: user.first_login_completed
+                user: {
+                    user_id: user.user_id,
+                    entra_oid: user.entra_oid,
+                    email: user.email,
+                    first_name: user.first_name,
+                    last_name: user.last_name,
+                    account_status: user.account_status,
+                    first_login_completed: user.first_login_completed
+                }
             }
         };
     } catch (error: any) {
@@ -157,12 +163,15 @@ export async function updateUserStatus(request: HttpRequest, context: Invocation
         return {
             status: 200,
             jsonBody: {
-                entra_oid: user.entra_oid,
-                email: user.email,
-                first_name: user.first_name,
-                last_name: user.last_name,
-                account_status: user.account_status,
-                first_login_completed: user.first_login_completed
+                user: {
+                    user_id: user.user_id,
+                    entra_oid: user.entra_oid,
+                    email: user.email,
+                    first_name: user.first_name,
+                    last_name: user.last_name,
+                    account_status: user.account_status,
+                    first_login_completed: user.first_login_completed
+                }
             }
         };
     } catch (error: any) {
